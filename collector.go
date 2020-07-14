@@ -41,6 +41,10 @@ func getBlockHeight() int16 {
 	} else {
 		var data EpochResponseBody
 		err := json.NewDecoder(response.Body).Decode(&data)
+		if err != nil {
+			panic(err)
+		}
+
 		fmt.Println(data.Result)
 	}
 
