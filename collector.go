@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
+	"strconv"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -27,7 +29,7 @@ type EpochRequestBody struct {
 	ID      int64  `json:"id"`
 }
 
-func getBlockHeight() int16 {
+func getBlockHeight() uint64 {
 	header := "application/json"
 	body, _ := json.Marshal(&EpochRequestBody{
 		JSONRPC: "2.0",
@@ -44,11 +46,10 @@ func getBlockHeight() int16 {
 		if err != nil {
 			panic(err)
 		}
-
-		fmt.Println(data.Result)
+		fmt.Println(reflect.TypeOf(data.Result))
+		epoch, _ := strconv.ParseUint(data.Result, 16, 64)
+		return epoch
 	}
-
-	return 1
 }
 
 func main() {
