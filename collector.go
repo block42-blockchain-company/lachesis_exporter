@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -45,17 +44,17 @@ func getBlockHeight() int64 {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(data.Result)
 		epoch, _ := strconv.ParseInt(data.Result, 0, 64)
 		return epoch
 	}
 }
 
-func main() {
-	result := fmt.Sprint(getBlockHeight())
-	fmt.Println(result)
-}
-
 func init() {
 	prometheus.MustRegister(currentEpoch)
+	currentEpoch.Observe(float64(getBlockHeight()))
+}
+
+// chronjob
+func updateMetrics() {
+	currentEpoch.Observe(float64(getBlockHeight()))
 }
