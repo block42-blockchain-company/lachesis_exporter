@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -16,29 +15,33 @@ var currentEpoch = prometheus.NewSummary(prometheus.SummaryOpts{
 
 const url = "http://localhost:18545"
 
-// GetEpochRequestBody For evaluating the current epoch
-func GetEpochRequestBody() ([]byte, error) {
-	return json.Marshal(&struct {
-		JSONRPC string `json:"jsonrpc"`
-		Method  string `json:"method"`
-		ID      int64  `json:"id"`
-	}{
-		JSONRPC: "2.0",
-		Method:  "ftm_currentEpoch",
-		ID:      1,
-	})
+type EpochResponseBody struct {
+	JSONRPC string `json:"jsonrpc"`
+	ID      int64  `json:"id"`
+	Result  string `json:"result"`
+}
+
+type EpochRequestBody struct {
+	JSONRPC string `json:"jsonrpc"`
+	Method  string `json:"method"`
+	ID      int64  `json:"id"`
 }
 
 func getBlockHeight() int16 {
 	header := "application/json"
-	body, _ := GetEpochRequestBody()
-	response, err := http.Post(url, header, bytes.NewBuffer(body))
+	body, _ := json.Marshal(&EpochRequestBody{
+		JSONRPC: "2.0",
+		Method:  "ftm_currentEpoch",
+		ID:      1,
+	})
 
+	response, err := http.Post(url, header, bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	} else {
-		data, _ := ioutil.ReadAll(response.Body)
-		fmt.Println(string(data))
+		var data EpochResponseBody
+		err := json.NewDecoder(response.Body).Decode(&data)
+		fmt.Println(data.Result)
 	}
 
 	return 1
