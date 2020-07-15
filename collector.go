@@ -15,7 +15,7 @@ import (
 var currentEpoch = promauto.NewGauge(prometheus.GaugeOpts{
 	Name: "current_epoch", Help: "Current epoch number"})
 
-const url = "http://localhost:18545"
+var url = "http://localhost:18545"
 
 type EpochResponseBody struct {
 	JSONRPC string `json:"jsonrpc"`
