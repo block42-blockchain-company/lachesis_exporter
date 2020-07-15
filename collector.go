@@ -12,7 +12,7 @@ import (
 )
 
 // TODO: Heavy Refactor!
-var currentEpoch = promauto.NewGauge(prometheus.SummaryOpts{
+var currentEpoch = promauto.NewGauge(prometheus.GaugeOpts{
 	Name: "current_epoch", Help: "Current epoch number"})
 
 const url = "http://localhost:18545"
