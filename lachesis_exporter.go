@@ -8,9 +8,10 @@ import (
 )
 
 func main() {
-	//This section will start the HTTP server and expose
-	//any metrics on the /metrics endpoint.
+	RecordMetrics()
+
 	http.Handle("/metrics", promhttp.Handler())
 	log.Info("Beginning to serve on port :9777")
 	log.Fatal(http.ListenAndServe(":9777", nil))
+
 }

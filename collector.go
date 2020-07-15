@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 // TODO: Heavy Refactor!
-var currentEpoch = prometheus.NewSummary(prometheus.SummaryOpts{
+var currentEpoch = promauto.NewGauge(prometheus.SummaryOpts{
 	Name: "current_epoch", Help: "Current epoch number"})
 
 const url = "http://localhost:18545"
@@ -27,7 +29,7 @@ type EpochRequestBody struct {
 	ID      int64  `json:"id"`
 }
 
-func getBlockHeight() int64 {
+func getCurrentEpoch() int64 {
 	header := "application/json"
 	body, _ := json.Marshal(&EpochRequestBody{
 		JSONRPC: "2.0",
@@ -49,12 +51,12 @@ func getBlockHeight() int64 {
 	}
 }
 
-func init() {
-	prometheus.MustRegister(currentEpoch)
-	currentEpoch.Observe(float64(getBlockHeight()))
-}
-
-// chronjob
-func updateMetrics() {
-	currentEpoch.Observe(float64(getBlockHeight()))
+// RecordMetrics | Update all metrics
+func RecordMetrics() {
+	go func() {
+		for {
+			currentEpoch.Set(float64(getCurrentEpoch()))
+			time.Sleep(2 * time.Second)
+		}
+	}()
 }
