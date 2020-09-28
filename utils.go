@@ -8,7 +8,7 @@ import (
 )
 
 func PrintResponse(resp http.Response) {
-	defer resp.Body.Close()
+	log.Info("Reading Body")
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
