@@ -126,24 +126,18 @@ func getDownTime() (int64, int64) {
 	})
 
 	response, err := http.Post(URL, header, bytes.NewBuffer(body))
-	PrintResponse(*response)
 	if err != nil {
 		fmt.Println(err.Error())
 		return 0, 0
 	} else {
-		var data ResponseBody
+		var data DownTimeResponse
 		err := json.NewDecoder(response.Body).Decode(&data)
 		if err != nil {
 			panic(err)
 		}
 
-		var Result DownTimeResponse
-
-		json.Unmarshal([]byte(data.Result), &Result)
-		downtimeVal, _ := strconv.ParseInt(Result.Downtime, 0, 64)
-		missedBlocksVal, _ := strconv.ParseInt(Result.MissedBlocks, 0, 64)
-
-		fmt.Printf("%+v", Result)
+		downtimeVal, _ := strconv.ParseInt(data.Result.Downtime, 0, 64)
+		missedBlocksVal, _ := strconv.ParseInt(data.Result.MissedBlocks, 0, 64)
 
 		return downtimeVal, missedBlocksVal
 	}

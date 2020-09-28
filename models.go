@@ -28,6 +28,12 @@ type StringParamRequestBody struct {
 }
 
 type DownTimeResponse struct {
+	JSONRPC string         `json:"jsonrpc"`
+	ID      int64          `json:"id"`
+	Result  DownTimeResult `json:"result"`
+}
+
+type DownTimeResult struct {
 	Downtime     string `json:"downtime"`
 	MissedBlocks string `json:"missedBlocks"`
 }
