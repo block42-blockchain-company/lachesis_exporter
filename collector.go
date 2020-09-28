@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -63,7 +64,8 @@ func getBlockHeight() int64 {
 
 	response, err := http.Post(URL, header, bytes.NewBuffer(body))
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
+		return 0
 	} else {
 		var data ResponseBody
 		err := json.NewDecoder(response.Body).Decode(&data)
@@ -85,7 +87,8 @@ func getCurrentEpoch() int64 {
 
 	response, err := http.Post(URL, header, bytes.NewBuffer(body))
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
+		return 0
 	} else {
 		var data ResponseBody
 		err := json.NewDecoder(response.Body).Decode(&data)
@@ -108,7 +111,8 @@ func getPeerCount() int64 {
 
 	response, err := http.Post(URL, header, bytes.NewBuffer(body))
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
+		return 0
 	} else {
 		var data ResponseBody
 		err := json.NewDecoder(response.Body).Decode(&data)
@@ -142,4 +146,5 @@ func RecordMetrics() {
 			time.Sleep(2 * time.Second)
 		}
 	}()
+
 }
