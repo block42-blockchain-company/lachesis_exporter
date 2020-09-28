@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -16,7 +15,7 @@ import (
 // URL of Lachesis API
 const URL = "http://localhost:18545"
 
-var stakerID int64 = 14
+var stakerID string = "14"
 
 // Declaring implemented metrics here
 
@@ -140,9 +139,9 @@ func getPeerCount() int64 {
 
 func getDownTime() int64 {
 	header := "application/json"
-	var param []int64
+	var param []string
 	param = append(param, stakerID)
-	body, _ := json.Marshal(&IntParamRequestBody{
+	body, _ := json.Marshal(&StringParamRequestBody{
 		JSONRPC: "2.0",
 		Method:  "sfc_getDowntime",
 		ID:      1,
@@ -151,7 +150,6 @@ func getDownTime() int64 {
 
 	response, err := http.Post(URL, header, bytes.NewBuffer(body))
 	PrintResponse(*response)
-	log.Info("Back in the game")
 	if err != nil {
 		fmt.Println(err.Error())
 		return 0
