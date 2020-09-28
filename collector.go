@@ -15,7 +15,7 @@ import (
 // URL of Lachesis API
 const URL = "http://localhost:18545"
 
-var stakerID string = "14"
+var stakerID string = "0xE"
 
 // Declaring implemented metrics here
 
