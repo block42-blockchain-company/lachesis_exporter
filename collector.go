@@ -140,7 +140,7 @@ func getPeerCount() int64 {
 func getDownTime() int64 {
 	header := "application/json"
 	var param []int64
-	param[0] = stakerID
+	param = append(param, stakerID)
 	body, _ := json.Marshal(&IntParamRequestBody{
 		JSONRPC: "2.0",
 		Method:  "sfc_getDowntime",
