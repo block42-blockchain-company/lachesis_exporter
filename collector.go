@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -149,6 +150,9 @@ func getDownTime() int64 {
 	})
 
 	response, err := http.Post(URL, header, bytes.NewBuffer(body))
+	PrintResponse(*response)
+	log.Info("Back in the game")
+
 	if err != nil {
 		fmt.Println(err.Error())
 		return 0
