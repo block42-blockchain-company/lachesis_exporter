@@ -28,6 +28,9 @@ var blockHeight = promauto.NewGauge(prometheus.GaugeOpts{
 var peerCount = promauto.NewGauge(prometheus.GaugeOpts{
 	Name: "peer_count", Help: "Number of peers connected"})
 
+var txPerSecond = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "tx_per_second", Help: "Transactions per second"})
+
 var downTime = promauto.NewGauge(prometheus.GaugeOpts{
 	Name: "down_time", Help: "Seconds of node being down"})
 
@@ -174,5 +177,31 @@ func RecordMetrics() {
 			time.Sleep(2 * time.Second)
 		}
 	}()
+}
+
+func getHeads(epochNumber string) int64 {
+	header := "application/json"
+	body, _ := json.Marshal(&StringParamRequestBody{
+		JSONRPC: "2.0",
+		Method:  "ftm_getHeads",
+		ID:      1,
+		Params:  nil,
+	})
+	response, err := http.Post(URL, header, bytes.NewBuffer(body))
+	if err != nil {
+		fmt.Println(err.Error())
+		return 0
+	} else {
+		var data ResponseBody
+		err := json.NewDecoder(response.Body).Decode(&data)
+		if err != nil {
+			panic(err)
+		}
+		peerCountVal, _ := strconv.ParseInt(data.Result, 0, 64)
+		return peerCountVal
+	}
+}
+
+func getTxPerSecond() {
 
 }
