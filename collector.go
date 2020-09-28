@@ -29,7 +29,10 @@ var peerCount = promauto.NewGauge(prometheus.GaugeOpts{
 	Name: "peer_count", Help: "Number of peers connected"})
 
 var downTime = promauto.NewGauge(prometheus.GaugeOpts{
-	Name: "down_time", Help: "Percentage being down"})
+	Name: "down_time", Help: "Seconds of node being down"})
+
+var missedBlocks = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "missed_blocks", Help: "Amount of blocks missed"})
 
 /*
 Node Related Metrics:
@@ -39,32 +42,6 @@ Node Related Metrics:
 [] Pending Transactions
 [] Hardware and System Specs (# of CPU cores, OS, RAM)
 */
-
-type ResponseBody struct {
-	JSONRPC string `json:"jsonrpc"`
-	ID      int64  `json:"id"`
-	Result  string `json:"result"`
-}
-
-type RequestBody struct {
-	JSONRPC string `json:"jsonrpc"`
-	Method  string `json:"method"`
-	ID      int64  `json:"id"`
-}
-
-type IntParamRequestBody struct {
-	JSONRPC string  `json:"jsonrpc"`
-	Method  string  `json:"method"`
-	ID      int64   `json:"id"`
-	Params  []int64 `json:"params"`
-}
-
-type StringParamRequestBody struct {
-	JSONRPC string   `json:"jsonrpc"`
-	Method  string   `json:"method"`
-	ID      int64    `json:"id"`
-	Params  []string `json:"params"`
-}
 
 func getBlockHeight() int64 {
 	header := "application/json"
@@ -137,7 +114,7 @@ func getPeerCount() int64 {
 	}
 }
 
-func getDownTime() int64 {
+func getDownTime() (int64, int64) {
 	header := "application/json"
 	var param []string
 	param = append(param, stakerID)
@@ -152,15 +129,23 @@ func getDownTime() int64 {
 	PrintResponse(*response)
 	if err != nil {
 		fmt.Println(err.Error())
-		return 0
+		return 0, 0
 	} else {
 		var data ResponseBody
 		err := json.NewDecoder(response.Body).Decode(&data)
 		if err != nil {
 			panic(err)
 		}
-		downTimeVal, _ := strconv.ParseInt(data.Result, 0, 64)
-		return downTimeVal
+
+		var Result DownTimeResponse
+
+		json.Unmarshal([]byte(data.Result), &Result)
+		downtimeVal, _ := strconv.ParseInt(Result.Downtime, 0, 64)
+		missedBlocksVal, _ := strconv.ParseInt(Result.MissedBlocks, 0, 64)
+
+		fmt.Printf("%+v", Result)
+
+		return downtimeVal, missedBlocksVal
 	}
 }
 
@@ -189,7 +174,9 @@ func RecordMetrics() {
 
 	go func() {
 		for {
-			downTime.Set(float64(getDownTime()))
+			downTimeVal, missedBlocksVal := getDownTime()
+			downTime.Set(float64(downTimeVal))
+			missedBlocks.Set(float64(missedBlocksVal))
 			time.Sleep(2 * time.Second)
 		}
 	}()
