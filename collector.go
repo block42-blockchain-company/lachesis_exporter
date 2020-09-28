@@ -149,6 +149,7 @@ func getDownTime() int64 {
 	})
 
 	response, err := http.Post(URL, header, bytes.NewBuffer(body))
+	PrintResponse(*response)
 	if err != nil {
 		fmt.Println(err.Error())
 		return 0
