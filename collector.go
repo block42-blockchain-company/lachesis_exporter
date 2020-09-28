@@ -12,7 +12,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
+// URL of Lachesis API
 const URL = "http://localhost:18545"
+
+var stakerID int64 = 14
 
 // Declaring implemented metrics here
 
@@ -24,6 +27,9 @@ var blockHeight = promauto.NewGauge(prometheus.GaugeOpts{
 
 var peerCount = promauto.NewGauge(prometheus.GaugeOpts{
 	Name: "peer_count", Help: "Number of peers connected"})
+
+var downTime = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "down_time", Help: "Percentage being down"})
 
 /*
 Node Related Metrics:
@@ -46,7 +52,14 @@ type RequestBody struct {
 	ID      int64  `json:"id"`
 }
 
-type ParamRequestBody struct {
+type IntParamRequestBody struct {
+	JSONRPC string  `json:"jsonrpc"`
+	Method  string  `json:"method"`
+	ID      int64   `json:"id"`
+	Params  []int64 `json:"params"`
+}
+
+type StringParamRequestBody struct {
 	JSONRPC string   `json:"jsonrpc"`
 	Method  string   `json:"method"`
 	ID      int64    `json:"id"`
@@ -55,7 +68,7 @@ type ParamRequestBody struct {
 
 func getBlockHeight() int64 {
 	header := "application/json"
-	body, _ := json.Marshal(&ParamRequestBody{
+	body, _ := json.Marshal(&StringParamRequestBody{
 		JSONRPC: "2.0",
 		Method:  "eth_blockNumber",
 		ID:      83,
@@ -72,8 +85,8 @@ func getBlockHeight() int64 {
 		if err != nil {
 			panic(err)
 		}
-		blocknr, _ := strconv.ParseInt(data.Result, 0, 64)
-		return blocknr
+		blockHeightVal, _ := strconv.ParseInt(data.Result, 0, 64)
+		return blockHeightVal
 	}
 }
 
@@ -95,14 +108,14 @@ func getCurrentEpoch() int64 {
 		if err != nil {
 			panic(err)
 		}
-		epoch, _ := strconv.ParseInt(data.Result, 0, 64)
-		return epoch
+		currentEpochVal, _ := strconv.ParseInt(data.Result, 0, 64)
+		return currentEpochVal
 	}
 }
 
 func getPeerCount() int64 {
 	header := "application/json"
-	body, _ := json.Marshal(&ParamRequestBody{
+	body, _ := json.Marshal(&StringParamRequestBody{
 		JSONRPC: "2.0",
 		Method:  "net_peerCount",
 		ID:      1,
@@ -121,6 +134,32 @@ func getPeerCount() int64 {
 		}
 		peerCountVal, _ := strconv.ParseInt(data.Result, 0, 64)
 		return peerCountVal
+	}
+}
+
+func getDownTime() int64 {
+	header := "application/json"
+	var param []int64
+	param[0] = stakerID
+	body, _ := json.Marshal(&IntParamRequestBody{
+		JSONRPC: "2.0",
+		Method:  "sfc_getDowntime",
+		ID:      1,
+		Params:  param,
+	})
+
+	response, err := http.Post(URL, header, bytes.NewBuffer(body))
+	if err != nil {
+		fmt.Println(err.Error())
+		return 0
+	} else {
+		var data ResponseBody
+		err := json.NewDecoder(response.Body).Decode(&data)
+		if err != nil {
+			panic(err)
+		}
+		downTimeVal, _ := strconv.ParseInt(data.Result, 0, 64)
+		return downTimeVal
 	}
 }
 
@@ -143,6 +182,13 @@ func RecordMetrics() {
 	go func() {
 		for {
 			peerCount.Set(float64(getPeerCount()))
+			time.Sleep(2 * time.Second)
+		}
+	}()
+
+	go func() {
+		for {
+			downTime.Set(float64(getDownTime()))
 			time.Sleep(2 * time.Second)
 		}
 	}()
