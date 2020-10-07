@@ -146,6 +146,35 @@ func getDownTime() (int64, int64) {
 	}
 }
 
+func getHeads(epochNumber string) int64 {
+	header := "application/json"
+	body, _ := json.Marshal(&StringParamRequestBody{
+		JSONRPC: "2.0",
+		Method:  "ftm_getHeads",
+		ID:      1,
+		Params:  nil,
+	})
+	response, err := http.Post(URL, header, bytes.NewBuffer(body))
+	if err != nil {
+		fmt.Println(err.Error())
+		return 0
+	} else {
+		var data ResponseBody
+		err := json.NewDecoder(response.Body).Decode(&data)
+		if err != nil {
+			panic(err)
+		}
+		peerCountVal, _ := strconv.ParseInt(data.Result, 0, 64)
+		return peerCountVal
+	}
+}
+
+func getTxPerSecond() int64 {
+	heads := getHeads("latest")
+	print(heads)
+	return heads
+}
+
 // RecordMetrics | Update all metrics
 func RecordMetrics() {
 	go func() {
@@ -177,31 +206,12 @@ func RecordMetrics() {
 			time.Sleep(2 * time.Second)
 		}
 	}()
-}
 
-func getHeads(epochNumber string) int64 {
-	header := "application/json"
-	body, _ := json.Marshal(&StringParamRequestBody{
-		JSONRPC: "2.0",
-		Method:  "ftm_getHeads",
-		ID:      1,
-		Params:  nil,
-	})
-	response, err := http.Post(URL, header, bytes.NewBuffer(body))
-	if err != nil {
-		fmt.Println(err.Error())
-		return 0
-	} else {
-		var data ResponseBody
-		err := json.NewDecoder(response.Body).Decode(&data)
-		if err != nil {
-			panic(err)
+	go func() {
+		for {
+			currentEpoch.Set(float64(getTxPerSecond()))
+			time.Sleep(2 * time.Second)
 		}
-		peerCountVal, _ := strconv.ParseInt(data.Result, 0, 64)
-		return peerCountVal
-	}
-}
-
-func getTxPerSecond() {
+	}()
 
 }
