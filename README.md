@@ -9,4 +9,4 @@ Currently, only epoch is supported. Other metrics like block height, total trans
 ## Useful resources
 Look into to following links to learn more about API's that we use for the lachesis exporter.
 * [Ethereum API](https://eth.wiki/json-rpc/API)
-* [Lachesis API](https://github.co**m/Fantom-foundation/go-lachesis/wiki/API)
+* [Lachesis API](https://github.com/Fantom-foundation/go-lachesis/wiki/API)

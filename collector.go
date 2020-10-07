@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -18,7 +19,6 @@ const URL = "http://localhost:18545"
 var stakerID string = "0xE"
 
 // Declaring implemented metrics here
-
 var currentEpoch = promauto.NewGauge(prometheus.GaugeOpts{
 	Name: "current_epoch", Help: "Current epoch number"})
 
@@ -146,33 +146,60 @@ func getDownTime() (int64, int64) {
 	}
 }
 
-func getHeads(epochNumber string) int64 {
+func getEventIDs(epochNumber string) []string {
 	header := "application/json"
 	body, _ := json.Marshal(&StringParamRequestBody{
 		JSONRPC: "2.0",
 		Method:  "ftm_getHeads",
 		ID:      1,
-		Params:  nil,
+		Params:  strings.Fields(epochNumber),
 	})
+
 	response, err := http.Post(URL, header, bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Println(err.Error())
-		return 0
+		return strings.Fields("") // lol xD
 	} else {
-		var data ResponseBody
+		var data ResponseBodyHead
 		err := json.NewDecoder(response.Body).Decode(&data)
 		if err != nil {
 			panic(err)
 		}
-		peerCountVal, _ := strconv.ParseInt(data.Result, 0, 64)
-		return peerCountVal
+		return data.Result
+	}
+}
+
+func getEvent(id string) map[string]interface{} {
+	header := "application/json"
+	body, _ := json.Marshal(&InterfaceParamRequestBody{
+		JSONRPC: "2.0",
+		Method:  "ftm_getEvent",
+		ID:      1,
+		Params:  []interface{}{id, true},
+	})
+	response, err := http.Post(URL, header, bytes.NewBuffer(body))
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil
+	} else {
+		var data ResponseBodyHeadInterface
+		err := json.NewDecoder(response.Body).Decode(&data)
+		if err != nil {
+			panic(err)
+		}
+		return data.Result
 	}
 }
 
 func getTxPerSecond() int64 {
-	heads := getHeads("latest")
-	print(heads)
-	return heads
+	IDs := getEventIDs("latest")
+	fmt.Println("latest:", IDs)
+	for _, id := range IDs {
+		event := getEvent(id)
+		fmt.Println(event["transactions"])
+	}
+
+	return 0
 }
 
 // RecordMetrics | Update all metrics

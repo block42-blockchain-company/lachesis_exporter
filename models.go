@@ -5,6 +5,16 @@ type ResponseBody struct {
 	ID      int64  `json:"id"`
 	Result  string `json:"result"`
 }
+type ResponseBodyHead struct {
+	JSONRPC string   `json:"jsonrpc"`
+	ID      int64    `json:"id"`
+	Result  []string `json:"result"`
+}
+type ResponseBodyHeadInterface struct {
+	JSONRPC string                 `json:"jsonrpc"`
+	ID      int64                  `json:"id"`
+	Result  map[string]interface{} `json:"result"`
+}
 
 type RequestBody struct {
 	JSONRPC string `json:"jsonrpc"`
@@ -25,6 +35,13 @@ type StringParamRequestBody struct {
 	Method  string   `json:"method"`
 	ID      int64    `json:"id"`
 	Params  []string `json:"params"`
+}
+
+type InterfaceParamRequestBody struct {
+	JSONRPC string        `json:"jsonrpc"`
+	Method  string        `json:"method"`
+	ID      int64         `json:"id"`
+	Params  []interface{} `json:"params"`
 }
 
 type DownTimeResponse struct {
