@@ -1,5 +1,7 @@
 package main
 
+import "github.com/prometheus/common/model"
+
 type ResponseBody struct {
 	JSONRPC string `json:"jsonrpc"`
 	ID      int64  `json:"id"`
@@ -53,4 +55,9 @@ type DownTimeResponse struct {
 type DownTimeResult struct {
 	Downtime     string `json:"downtime"`
 	MissedBlocks string `json:"missedBlocks"`
+}
+
+type Transactions struct {
+	count uint64
+	start model.Time
 }

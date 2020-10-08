@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -192,14 +194,28 @@ func getEvent(id string) map[string]interface{} {
 }
 
 func getTxPerSecond() int64 {
+	//jsonFile, err = os.Open("transactions.json")
+
 	IDs := getEventIDs("latest")
-	fmt.Println("latest:", IDs)
 	for _, id := range IDs {
 		event := getEvent(id)
 		fmt.Println(event["transactions"])
 	}
 
 	return 0
+}
+
+func openJson() {
+	jsonFile, err := os.Open("transactions.json")
+	if err != nil {
+		return
+	}
+	defer jsonFile.Close()
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var transactions Transactions
+	json.Unmarshal(byteValue, &transactions)
+	fmt.Println(transactions)
+	return
 }
 
 // RecordMetrics | Update all metrics
@@ -240,5 +256,4 @@ func RecordMetrics() {
 			time.Sleep(2 * time.Second)
 		}
 	}()
-
 }
