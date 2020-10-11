@@ -194,28 +194,39 @@ func getEvent(id string) map[string]interface{} {
 }
 
 func getTxPerSecond() int64 {
-	//jsonFile, err = os.Open("transactions.json")
+	// try to open a transactions.json, if not existing create a new one
+	transactions, err := openJson("transactions.json")
+	if err != nil {
+		transactions = &Transactions{0, time.Now().Unix()}
+	}
 
 	IDs := getEventIDs("latest")
 	for _, id := range IDs {
 		event := getEvent(id)
-		fmt.Println(event["transactions"])
+		txArr := event["transactions"].([]interface{})
+		if len(txArr) > 0 {
+			transactions.Count += len(txArr)
+		}
 	}
-
-	return 0
+	saveJson("transactions.json", transactions)
+	return int64(transactions.Count) / (transactions.Start - time.Now().Unix())
 }
 
-func openJson() {
-	jsonFile, err := os.Open("transactions.json")
+func openJson(fileName string) (*Transactions, error) {
+	jsonFile, err := os.Open(fileName)
 	if err != nil {
-		return
+		return nil, err
 	}
 	defer jsonFile.Close()
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 	var transactions Transactions
 	json.Unmarshal(byteValue, &transactions)
-	fmt.Println(transactions)
-	return
+	return &transactions, nil
+}
+
+func saveJson(fileName string, jsonData interface{}) {
+	jsonString, _ := json.MarshalIndent(jsonData, "", " ")
+	_ = ioutil.WriteFile(fileName, jsonString, 0644)
 }
 
 // RecordMetrics | Update all metrics
@@ -252,7 +263,7 @@ func RecordMetrics() {
 
 	go func() {
 		for {
-			currentEpoch.Set(float64(getTxPerSecond()))
+			txPerSecond.Set(float64(getTxPerSecond()))
 			time.Sleep(2 * time.Second)
 		}
 	}()
