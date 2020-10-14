@@ -209,7 +209,12 @@ func getTxPerSecond() int64 {
 		}
 	}
 	saveJson("transactions.json", transactions)
-	return int64(transactions.Count) / (transactions.Start - time.Now().Unix())
+
+	timeDiff := transactions.Start - time.Now().Unix()
+	if timeDiff == 0 {
+		timeDiff = 1
+	}
+	return int64(transactions.Count) / timeDiff
 }
 
 func openJson(fileName string) (*Transactions, error) {
