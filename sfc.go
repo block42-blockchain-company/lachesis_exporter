@@ -49,17 +49,7 @@ func sfc() *contracts.Stakers {
 	return contract
 }
 
-func getEpochSnapshot(epochID *big.Int) struct {
-	EndTime                *big.Int
-	Duration               *big.Int
-	EpochFee               *big.Int
-	TotalBaseRewardWeight  *big.Int
-	TotalTxRewardWeight    *big.Int
-	BaseRewardPerSecond    *big.Int
-	StakeTotalAmount       *big.Int
-	DelegationsTotalAmount *big.Int
-	TotalSupply            *big.Int
-} {
+func getEpochSnapshot(epochID *big.Int) Epoch {
 	epoch, err := sfc().EpochSnapshots(nil, epochID)
 	if err != nil {
 		log.Fatal(err)
