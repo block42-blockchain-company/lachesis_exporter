@@ -4,7 +4,7 @@ import (
 	_ "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"lachesis_exporter/contracts"
+	contracts "lachesis_exporter/contracts"
 	"log"
 	"math/big"
 )
