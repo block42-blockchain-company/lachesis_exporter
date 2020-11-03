@@ -31,6 +31,15 @@ var downTime = promauto.NewGauge(prometheus.GaugeOpts{
 var missedBlocks = promauto.NewGauge(prometheus.GaugeOpts{
 	Name: "missed_blocks", Help: "Amount of blocks missed"})
 
+var totalSupply = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "total_supply", Help: "FTM Total Supply"})
+
+var totalStaked = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "total_staked", Help: "FTM Total Staked"})
+
+var totalDelegated = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "total_delegated", Help: "FTM Total Delegated"})
+
 /*
 Node Related Metrics:
 [x] # of connected peers
@@ -75,6 +84,15 @@ func RecordMetrics() {
 	go func() {
 		for {
 			txPerSecond.Set(float64(getTxPerSecond()))
+			time.Sleep(2 * time.Second)
+		}
+	}()
+
+	go func() {
+		for {
+			totalSupply.Set(float64(getTotalSupply()))
+			totalStaked.Set(float64(getTotalStaked()))
+			totalDelegated.Set(float64(getTotalDelegated()))
 			time.Sleep(2 * time.Second)
 		}
 	}()

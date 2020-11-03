@@ -42,7 +42,7 @@ func sfc() *contracts.Stakers {
 	num, err := contract.StakersNum(nil) // sanity check
 	if err != nil {
 		log.Fatal(err)
-	} else if num.Cmp(big.NewInt(0)) != 0 {
+	} else if num.Cmp(big.NewInt(0)) <= 0 {
 		log.Fatal(num)
 	}
 
@@ -55,4 +55,16 @@ func getEpochSnapshot(epochID *big.Int) Epoch {
 		log.Fatal(err)
 	}
 	return epoch
+}
+
+func getTotalSupply() int64 {
+	return getEpochSnapshot(big.NewInt(getCurrentEpoch())).TotalSupply.Int64()
+}
+
+func getTotalStaked() int64 {
+	return getEpochSnapshot(big.NewInt(getCurrentEpoch())).StakeTotalAmount.Int64()
+}
+
+func getTotalDelegated() int64 {
+	return getEpochSnapshot(big.NewInt(getCurrentEpoch())).DelegationsTotalAmount.Int64()
 }
