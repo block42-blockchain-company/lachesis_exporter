@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -39,6 +40,15 @@ var totalStaked = promauto.NewGauge(prometheus.GaugeOpts{
 
 var totalDelegated = promauto.NewGauge(prometheus.GaugeOpts{
 	Name: "total_delegated", Help: "FTM Total Delegated"})
+
+var totalUnelegated = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "total_undelegated", Help: "FTM Total Undelegated"})
+
+var numOfValidators = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "num_of_Validators", Help: "FTM Total Undelegated"})
+
+var totalSelfStaked = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "total_self_staked", Help: "Total self-staked FTM"})
 
 /*
 Node Related Metrics:
@@ -93,6 +103,10 @@ func RecordMetrics() {
 			totalSupply.Set(float64(getTotalSupply()))
 			totalStaked.Set(float64(getTotalStaked()))
 			totalDelegated.Set(float64(getTotalDelegated()))
+			totalUnelegated.Set(float64(getTotalStaked() - getTotalDelegated()))
+			numOfValidators.Set(float64(getStakersLastID()))
+			totalSelfStaked.Set(float64(getTotalSelfStaked()))
+			fmt.Println("%d\n", getTotalSelfStaked())
 			time.Sleep(2 * time.Second)
 		}
 	}()
