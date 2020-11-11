@@ -1,11 +1,11 @@
 package main
 
 import (
-	contracts "github.com/block42-blockchain-company/lachesis_exporter/contracts"
+	//contracts "github.com/block42-blockchain-company/lachesis_exporter/contracts"
 	_ "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	// contracts "lachesis_exporter/contracts"
+	contracts "lachesis_exporter/contracts"
 	"log"
 	"math/big"
 )
